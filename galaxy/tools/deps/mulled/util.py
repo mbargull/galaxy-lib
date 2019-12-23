@@ -226,13 +226,13 @@ def v2_image_name(targets, image_build=None, name_override=None):
 class PrintProgress(object):
     def __init__(self):
         self.thread = threading.Thread(target=self.progress)
-        self.stop = False
+        self.stop = threading.Event()
 
     def progress(self):
-        while not self.stop:
+        while not self.stop.is_set():
             print(".", end="")
             sys.stdout.flush()
-            time.sleep(60)
+            self.stop.wait(60)
         print("")
 
     def __enter__(self):
@@ -240,7 +240,7 @@ class PrintProgress(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.stop = True
+        self.stop.set()
         self.thread.join()
 
 
